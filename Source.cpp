@@ -7,13 +7,13 @@ void main()
 {
 	using namespace std;
 	
-	Game game;
+	Game game(3, 7);
 	game.place({0,0}, new BlackRook);
 
 	game.draw();
 	cout << "----------------------------------------------" << endl;
 
-	game.move({ 0,0 }, { 0,6 });
+	game.move({ 0,0 }, { 5,0 });
 	game.draw();
 
 

@@ -82,46 +82,73 @@ void Game::draw()
 	const size_t black = 0;
 	const size_t white = 1;
 	const unsigned char border[2][7] = {
-		{201, 205, 187, 186, 188, 200, 32},
-		{218, 196, 191, 179, 217, 192, 32}
+		{ 176, 176, 176, 176, 176, 176, 176 },
+		//{201, 205, 187, 186, 188, 200, 32},
+		{ 32, 32, 32, 32, 32, 32, 32 }
+		//{ 218, 196, 191, 179, 217, 192, 32 }
+		
 	};
 	R cell_regionist(cell_height, cell_width);
+
+	const unsigned char board_border[6] = {
+		218, 196, 191, 179, 217, 192
+	}; // no need for interior, just borders
+
+	const size_t b_width = Board::chess_board_size_second * cell_width + 2;
+	const size_t b_height = Board::chess_board_size_first * cell_height + 2;
+	R board_regionist(b_height, b_width);
+
+	size_t b_h = 0;
+	for (size_t b_w = 0; b_w < b_width; ++b_w) {
+		cout << board_border[board_regionist.position(b_h, b_w)];
+	} cout << endl;
 
 
 	size_t color = 0;
 	// notes about (i,j) and (x,y) at end of scope
 	for (size_t y = 0; y < Board::chess_board_size_first; ++y) { // traverse board -- up-down
+		
+		// render line-by-line
 		for (size_t j = 0; j < cell_height; ++j) {
-			
+			cout << board_border[R::vertical_side];
+
+		// line starts here
 			bool middle = (j == cell_height / 2); // if j is at about middle of the cell (height - wise)
+
 			
 			for (size_t x = 0; x < Board::chess_board_size_second; ++x) { // traverse board -- left-right
-				// determine cell color
-				// x and y are both determined here
-				color = (black_cell({x,y})) ? (0) : (1);
-				                                        // 0 : black
-				                                       // 1 : white
+																		  // determine cell color
+																		  // x and y are both determined here
+				color = (black_cell({ x,y })) ? (0) : (1);
+				// 0 : black
+				// 1 : white
 				for (size_t i = 0; i < cell_width; ++i) {
-					
+
 					R::where p = cell_regionist.position(j, i);
-					
-					if (board[{x,y}] != nullptr
+
+					if (board[{x, y}] != nullptr
 						&& p == R::vertical_side
 						&& middle) {
-						cout << border[color][R::vertical_side] << (board[{x,y}]->Symbol()) << border[color][R::vertical_side];
+						cout << border[color][R::vertical_side] << (board[{x, y}]->Symbol()) << border[color][R::vertical_side];
 						break; // this cell line unit done
 					}
 					else {
 						cout << border[color][p];
 					}
-				}
+				}	
 			}
 
-			               // j is a line
-			cout << endl; // this line unit done
-			             // line break
+			// j is a line
+			cout << board_border[R::vertical_side] << endl;
+			               // this line unit done
+						  // line break
 		}
 	}
+	
+	b_h = b_height - 1;
+	for (size_t b_w = 0; b_w < b_width; ++b_w) {
+		cout << board_border[board_regionist.position(b_h, b_w)];
+	} cout << endl;
 	
 	 // (i,j) maps printed cell (including borders)
 	// each character is a (i,j)

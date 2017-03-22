@@ -1,6 +1,6 @@
 #include "BlackRook.h"
 
-BlackRook::BlackRook() : text_name("Black Rook"), symbol("b-r")
+BlackRook::BlackRook() : text_name("Black Rook"), symbol(" b-r ")
 {
 }
 
