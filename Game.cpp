@@ -107,6 +107,8 @@ void Game::draw()
 
 	//summary of recursive structure that's about to happen
 	//traverse: board row - -> unit line of board row - -> cell in row - -> unit line of cell
+	//unit lines of cells are concatenable on one line
+	//everything is nearly concatenable (vertically)
 	//a picture would explain better (unfortunately not provided)
 
 	size_t color = 0;
