@@ -110,9 +110,9 @@ void Game::draw()
 		
 		// render line-by-line
 		for (size_t j = 0; j < cell_height; ++j) {
-			cout << board_border[R::vertical_side];
 
-		// line starts here
+			// line start here
+			cout << board_border[R::vertical_side];
 			bool middle = (j == cell_height / 2); // if j is at about middle of the cell (height - wise)
 
 			
@@ -123,13 +123,13 @@ void Game::draw()
 				// 0 : black
 				// 1 : white
 				for (size_t i = 0; i < cell_width; ++i) {
-
 					R::where p = cell_regionist.position(j, i);
-
 					if (board[{x, y}] != nullptr
 						&& p == R::vertical_side
 						&& middle) {
-						cout << border[color][R::vertical_side] << (board[{x, y}]->Symbol()) << border[color][R::vertical_side];
+						cout << border[color][R::vertical_side]
+							<< (board[{x, y}]->Symbol())
+							<< border[color][R::vertical_side];
 						break; // this cell line unit done
 					}
 					else {
@@ -140,6 +140,7 @@ void Game::draw()
 
 			// j is a line
 			cout << board_border[R::vertical_side] << endl;
+			// line end here
 			               // this line unit done
 						  // line break
 		}
