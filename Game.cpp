@@ -47,8 +47,9 @@ public:
 	R(size_t im, size_t jm, size_t i0 = 0, size_t j0 = 0);
 	~R();
 
-	// ~not used
+	
 public:
+	// ~not used
 	void draw();
 
 
@@ -103,6 +104,10 @@ void Game::draw()
 		cout << board_border[board_regionist.position(b_h, b_w)];
 	} cout << endl;
 
+
+	//summary of recursive structure that's about to happen
+	//traverse: board row - -> unit line of board row - -> cell in row - -> unit line of cell
+	//a picture would explain better (unfortunately not provided)
 
 	size_t color = 0;
 	// notes about (i,j) and (x,y) at end of scope
