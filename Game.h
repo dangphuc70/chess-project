@@ -11,6 +11,7 @@ public:
 private:
 	Board board;
 
+
 public:
 	bool place(const Coordinate& destination, Piece * piece);
 	bool validate_move(const Coordinate& source, const Coordinate& destination);

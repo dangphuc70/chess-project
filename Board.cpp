@@ -22,7 +22,7 @@ bool Board::validate_move(const Coordinate & s, const Coordinate & d)
 	if (!valid_coordinate(s) || !valid_coordinate(d)) {
 		return false;
 	}
-	else if (b[s] == nullptr) {
+	else if ((*this)[s] == nullptr) {
 		return false;
 	}
 	else if (s == d) {

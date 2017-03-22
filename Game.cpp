@@ -107,7 +107,7 @@ void Game::draw()
 						&& p == R::vertical_side
 						&& middle) {
 						cout << border[color][R::vertical_side]
-							<< (board[{x, y}]->Symbol())
+							<< (board[{x, y}]->OnBoardSymbol())
 							<< border[color][R::vertical_side];
 						break; // this cell-line-unit done
 					}

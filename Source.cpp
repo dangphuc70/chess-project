@@ -1,13 +1,15 @@
 #include <iostream>
 #include "Game.h"
 #include "Interfaces.h"
+#include "Piece.h"
 
 void main()
 {
 	using namespace std;
 	
 	Game game(3, 7);
-	game.place({0,0});
+	Piece emptyPiece;
+	game.place({0,0}, &emptyPiece);
 
 	game.draw();
 	cout << "----------------------------------------------" << endl;
