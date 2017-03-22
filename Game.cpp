@@ -40,42 +40,10 @@ bool Game::move(const Coordinate & s, const Coordinate & d)
 
 
 
-// helper
-class R
-{
-public:
-	R(size_t im, size_t jm, size_t i0 = 0, size_t j0 = 0);
-	~R();
-
-	
-public:
-	// ~not used
-	void draw();
-
-
-private:
-	size_t i0;
-	size_t j0;
-
-	size_t im;
-	size_t jm;
-
-public:
-	enum where {
-			top_left = 0,
-			horizontal_side = 1,
-			top_right = 2,
-			vertical_side = 3,
-			bottom_right = 4,
-			bottom_left = 5,
-			inside = 6,
-			// probably not used in Game (the following 2 elements)
-			edge_region = 7,
-
-	};
-
-	where position(size_t i, size_t j);
-};
+// helper class
+// R ~ Rectangle
+// (relevant to a rectangle, not a Rectangle object)
+#include "R.h"
 
 
 void Game::draw()
@@ -89,14 +57,15 @@ void Game::draw()
 		//{ 218, 196, 191, 179, 217, 192, 32 }
 		
 	};
-	R cell_regionist(cell_height, cell_width);
 
 	const unsigned char board_border[6] = {
 		218, 196, 191, 179, 217, 192
 	}; // no need for interior, just borders
-
 	const size_t b_width = Board::chess_board_size_second * cell_width + 2;
 	const size_t b_height = Board::chess_board_size_first * cell_height + 2;
+	
+	
+	R cell_regionist(cell_height, cell_width);
 	R board_regionist(b_height, b_width);
 
 	size_t b_h = 0;
@@ -106,10 +75,11 @@ void Game::draw()
 
 
 	//summary of recursive structure that's about to happen
-	//traverse: board row - -> unit line of board row - -> cell in row - -> unit line of cell
-	//unit lines of cells are concatenable on one line
-	//everything is nearly concatenable (vertically)
-	//a picture would explain better (unfortunately not provided)
+	//traverse: board row - -> unit line of board row - -> cells in row - -> unit line of cell
+	// unit line is a console line (printed console line)
+	//unit lines of cells are concatenable on one line (in the console)
+	//everything is nearly concatenable vertically and therefore, vertical concatenability is trivial
+	//a picture would better explain (unfortunately, not provided)
 
 	size_t color = 0;
 	// notes about (i,j) and (x,y) at end of scope
@@ -120,24 +90,26 @@ void Game::draw()
 
 			// line start here
 			cout << board_border[R::vertical_side];
-			bool middle = (j == cell_height / 2); // if j is at about middle of the cell (height - wise)
+			bool middle = (j == cell_height / 2); // if j is at about the
+			                                     // middle of the cell (height-wise)
 
 			
 			for (size_t x = 0; x < Board::chess_board_size_second; ++x) { // traverse board -- left-right
 																		  // determine cell color
-																		  // x and y are both determined here
+																		  // x and y are both determined at
+				                                                          // this stage
 				color = (black_cell({ x,y })) ? (0) : (1);
 				// 0 : black
 				// 1 : white
 				for (size_t i = 0; i < cell_width; ++i) {
 					R::where p = cell_regionist.position(j, i);
-					if (board[{x, y}] != nullptr
+					if (board[{x, y}] != nullptr // contact with piece
 						&& p == R::vertical_side
 						&& middle) {
 						cout << border[color][R::vertical_side]
 							<< (board[{x, y}]->Symbol())
 							<< border[color][R::vertical_side];
-						break; // this cell line unit done
+						break; // this cell-line-unit done
 					}
 					else {
 						cout << border[color][p];
@@ -145,10 +117,10 @@ void Game::draw()
 				}	
 			}
 
-			// j is a line
+			// j is a line (console line)
 			cout << board_border[R::vertical_side] << endl;
 			// line end here
-			               // this line unit done
+			               // this line unit done (console line)
 						  // line break
 		}
 	}
@@ -170,91 +142,5 @@ bool Game::black_cell(const Coordinate & coor)
 	return (coor.x + coor.y) % 2 != 0;
 }
 
-
-
-R::R(size_t im, size_t jm, size_t i0, size_t j0)
-{
-	if (im > i0 && jm > j0) {
-		this->i0 = i0;
-		this->j0 = j0;
-		this->im = im;
-		this->jm = jm;
-	}
-	else {
-		this->i0 = 0;
-		this->j0 = 0;
-		this->im = im;
-		this->jm = jm;
-	}
-}
-
-R::~R()
-{
-}
-
-void R::draw()
-{
-	const unsigned char t_left = 218, h_side = 196, t_right = 191;
-	const unsigned char edge_r = 167;
-	const unsigned char               in = '-', v_side = 179;
-	const unsigned char b_left = 192, b_right = 217;
-
-	using namespace std;
-	for (size_t i = i0; i <= im; ++i)
-	{
-		for (size_t j = j0; j <= jm; ++j)
-		{
-			switch (position(i, j))
-			{
-			case top_left:
-				cout << t_left;
-				break;
-			case horizontal_side:
-				cout << h_side;
-				break;
-			case top_right:
-				cout << t_right;
-				break;
-			case vertical_side:
-				cout << v_side;
-				break;
-			case bottom_right:
-				cout << b_right;
-				break;
-			case bottom_left:
-				cout << b_left;
-				break;
-			case edge_region:
-				cout << edge_r;
-				break;
-			case inside:
-				cout << in;
-				break;
-			}
-		}
-		cout << endl;
-	}
-
-}
-
-R::where R::position(size_t i, size_t j)
-{
-	if (i == i0 && j == j0)
-		return top_left;
-	else if (i == i0 && j == jm-1)
-		return top_right;
-	else if (i == im-1 && j == jm-1)
-		return bottom_right;
-	else if (i == im-1 && j == j0)
-		return bottom_left;
-	else if (i == i0 || i == im-1)
-		return horizontal_side;
-	else if (j == j0 || j == jm-1)
-		return vertical_side;
-	else if (i == i0 + 1 || i == im - 2 || j == j0 + 1 || j == jm - 2)
-		return inside;
-	else
-		return inside;
-}
 
 
