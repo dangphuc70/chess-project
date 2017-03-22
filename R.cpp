@@ -1,5 +1,7 @@
 #include "R.h"
 
+#include <iostream>
+using namespace std;
 
 R::R(size_t im, size_t jm, size_t i0, size_t j0)
 {

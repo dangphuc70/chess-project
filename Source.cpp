@@ -1,5 +1,4 @@
 #include <iostream>
-#include "BlackRook.h"
 #include "Game.h"
 #include "Interfaces.h"
 
@@ -8,7 +7,7 @@ void main()
 	using namespace std;
 	
 	Game game(3, 7);
-	game.place({0,0}, new BlackRook);
+	game.place({0,0});
 
 	game.draw();
 	cout << "----------------------------------------------" << endl;
