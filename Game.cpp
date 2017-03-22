@@ -77,7 +77,6 @@ public:
 };
 
 
-class R;
 void Game::draw()
 {
 	const size_t black = 0;
