@@ -4,6 +4,8 @@
 #include <string>
 #include <cmath>
 #include <fstream>
+#include <sstream>
+#include "PieceBox.h"
 
 using namespace std;
 
@@ -28,8 +30,38 @@ void Game::save(const char * filename)
 	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
 		for (size_t y = 0; y < Board::chess_board_size_second; ++y) {
 			if (b_map[x][y] != nullptr)
-				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << endl;
+				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << ' ';
 		}
+	}
+}
+
+void Game::load(const char * filename)
+{
+	ifstream loadfile(filename);
+
+	if (!loadfile) {
+		cout << "Unable to load from file : " << filename << endl;
+		return;
+	}
+
+	clear(); // clear game
+	
+	try {
+		PieceBox box;
+		Coordinate d = { 0, 0 };
+		string chunk;
+		while (loadfile) {
+			loadfile >> d.x >> d.y;
+			cout << d.x << ' ' << d.y << endl;
+			loadfile >> chunk;
+			cout << chunk << endl;
+			place(d, box[chunk], unique_ptr<string>(new string(chunk)));
+		}
+	}
+	catch (string e) {
+		cout << "Exception being handled" << endl;
+		cout << e << endl;
+		return;
 	}
 }
 
@@ -254,6 +286,16 @@ void Game::draw()
 
 	 // (x,y) maps the cells on the chess board
 	// each cell is a (x,y)
+}
+
+void Game::clear()
+{
+	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
+		for (size_t y = 0; y < Board::chess_board_size_second; ++y) {
+			board[{x, y}].reset();
+			b_map[x][y].reset();
+		}
+	}
 }
 
 bool Game::black_cell(const Coordinate & coor)

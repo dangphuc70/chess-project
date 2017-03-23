@@ -20,6 +20,8 @@ void main()
 		PieceBox box;
 
 		game.place({0,0}, box["WQ"], unique_ptr<string>(new string("WQ")));
+		game.place({ 0,1 }, box["WR"], unique_ptr<string>(new string("WR")));
+		game.place({ 5,5 }, box["BR"], unique_ptr<string>(new string("BR")));
 
 
 		game.draw();
@@ -29,6 +31,12 @@ void main()
 		game.draw();
 
 		game.save("savedgame.txt");
+
+		game.clear();
+		game.draw();
+
+		game.load("savedgame.txt");
+		game.draw();
 	}
 	_CrtDumpMemoryLeaks();
 	system("PAUSE");

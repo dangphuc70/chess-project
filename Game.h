@@ -10,7 +10,7 @@ public:
 
 public:
 	void save(const char * filename);
-	//void load(const string& filename);
+	void load(const char * filename);
 
 private:
 	Board board;
@@ -20,7 +20,7 @@ public:
 	bool validate_move(const Coordinate& source, const Coordinate& destination);
 	bool move(const Coordinate& source, const Coordinate& destination);
 	void draw();
-
+	void clear();
 private:
 	size_t cell_height; // for text render
 	size_t cell_width; // for text render

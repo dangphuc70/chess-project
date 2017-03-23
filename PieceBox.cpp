@@ -1,5 +1,6 @@
 #include "PieceBox.h"
-
+#include <string>
+#include <iostream>
 
 void Insert(map<string, unique_ptr<Piece>> &a, const string & key, Piece * p) {
 	a.insert(make_pair(key, unique_ptr<Piece>(p)));
@@ -32,6 +33,10 @@ PieceBox::~PieceBox()
 
 unique_ptr<Piece> PieceBox::operator[](const string & key)
 {
-	Piece * p = box[key].get()->clone();
-	return unique_ptr<Piece>(p);
+		auto result = box.find(key);
+		if (result == box.end()) {
+			throw string(key + " not found");
+		}
+		Piece * p = box[key].get()->clone();
+		return unique_ptr<Piece>(p);
 }
