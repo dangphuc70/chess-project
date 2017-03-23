@@ -39,6 +39,8 @@ bool Game::save(const  string filename)
 		return false;
 	}
 
+	cout << "Saving..." << endl;
+
 	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
 		for (size_t y = 0; y < Board::chess_board_size_second; ++y) {
 			if (b_map[x][y] != nullptr)
@@ -58,7 +60,7 @@ bool Game::load(const string filename)
 	}
 
 	clear(); // clear game
-	
+	cout << "Loading..." << endl;
 	try {
 		Coordinate d = { 0, 0 };
 		string chunk;
