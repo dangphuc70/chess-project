@@ -9,8 +9,10 @@
 
 using namespace std;
 
-Game::Game(size_t c_h, size_t c_w) : cell_height(c_h), cell_width(c_w)
+Game::Game(size_t c_h, size_t c_w) : cell_height(c_h), cell_width(c_w), box(),
+turn(false), nturn(0)
 {
+	load("hello.txt");
 }
 
 
@@ -18,7 +20,17 @@ Game::~Game()
 {
 }
 
-void Game::save(const char * filename)
+int Game::numberOfTurn()
+{
+	return nturn;
+}
+
+const string & Game::Turn()
+{
+	return turn ? "black" : "white";
+}
+
+void Game::save(const  string filename)
 {
 	ofstream savefile(filename);
 
@@ -35,7 +47,7 @@ void Game::save(const char * filename)
 	}
 }
 
-void Game::load(const char * filename)
+void Game::load(const string filename)
 {
 	ifstream loadfile(filename);
 
@@ -47,7 +59,6 @@ void Game::load(const char * filename)
 	clear(); // clear game
 	
 	try {
-		PieceBox box;
 		Coordinate d = { 0, 0 };
 		string chunk;
 		while (loadfile) {
@@ -72,6 +83,18 @@ bool Game::place(const Coordinate & destination, unique_ptr<Piece>& _Piece, uniq
 		board[destination] = std::move(_Piece); // this destroys piece already at destination
 		                                // and puts piece there
 		b_map[destination.x][destination.y] = std::move(_Key);
+		++nturn;
+	}
+	return coordinate_valid;
+}
+
+bool Game::place(const Coordinate & destination, const std::string & _CommonName)
+{
+	bool coordinate_valid = board.valid_coordinate(destination);
+	if (coordinate_valid) {
+		board[destination] = std::move(box[_CommonName]); // this destroys piece already at destination
+												// and puts piece there
+		b_map[destination.x][destination.y] = std::move(unique_ptr<string>(new string(_CommonName)));
 	}
 	return coordinate_valid;
 }
@@ -79,6 +102,12 @@ bool Game::place(const Coordinate & destination, unique_ptr<Piece>& _Piece, uniq
 bool Game::validate_move(const Coordinate & source, const Coordinate & destination)
 {
 	if (!board.valid_coordinate(source) || !board.valid_coordinate(destination))
+		return false;
+
+	if (turn == true && board[source]->color() == PieceOut::white)
+		return false;
+
+	if (turn == false && board[source]->color() == PieceOut::black)
 		return false;
 
 	// special case : Pawn
@@ -193,7 +222,7 @@ void Game::draw()
 		cout << ' ';
 		for (size_t x = 0; x < Board::chess_board_size_second; ++x) {
 			for (size_t i = 0; i < cell_width; ++i) {
-				if (i == cell_width / 2) cout << x;
+				if (i == cell_width / 2) cout << char('a' + x);
 				else cout << ' ';
 			}
 		}
@@ -223,7 +252,7 @@ void Game::draw()
 			// line start here
 			
 			bool middle = (j == cell_height / 2); // if j is at about middle of the cell (height - wise)
-			if (coordinate_marker && middle) cout << y;
+			if (coordinate_marker && middle) cout << (8-y);
 			else if (coordinate_marker) cout << ' ';
 			cout << board_border[R::vertical_side];
 			
@@ -250,7 +279,7 @@ void Game::draw()
 			}
 
 
-			if (coordinate_marker && middle) cout << board_border[R::vertical_side] << y;
+			if (coordinate_marker && middle) cout << board_border[R::vertical_side] << (8 - y);
 			else 
 			// j is a line
 			cout << board_border[R::vertical_side];
@@ -274,7 +303,7 @@ void Game::draw()
 		cout << ' ';
 		for (size_t x = 0; x < Board::chess_board_size_second; ++x) {
 			for (size_t i = 0; i < cell_width; ++i) {
-				if (i == cell_width / 2) cout << x;
+				if (i == cell_width / 2) cout << char('a' + x);
 				else cout << ' ';
 			}
 		}
@@ -301,6 +330,16 @@ void Game::clear()
 bool Game::black_cell(const Coordinate & coor)
 {
 	return (coor.x + coor.y) % 2 != 0;
+}
+
+Coordinate Game::to_coordinate(char letter, size_t number)
+{
+	if (letter >= 'a' && letter <= 'h') {
+		if (number >= 1 && number <= 8) {
+			return {size_t(letter-'a'), 8-number};
+		}
+	}
+	return {0,0};
 }
 
 
