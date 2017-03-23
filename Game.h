@@ -14,8 +14,8 @@ public:
 	const string & Turn();
 
 public:
-	void save(const string filename);
-	void load(const string filename);
+	bool save(const string filename);
+	bool load(const string filename);
 
 private:
 	bool turn; // true : black, false : white
@@ -35,6 +35,10 @@ private:
 	size_t cell_height; // for text render
 	size_t cell_width; // for text render
 	bool black_cell(const Coordinate& coor);
+
+private:
+	const string turnBlack = "black";
+	const string turnWhite = "white";
 	
 };
 

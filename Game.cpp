@@ -27,16 +27,16 @@ int Game::numberOfTurn()
 
 const string & Game::Turn()
 {
-	return turn ? "black" : "white";
+	return turn ? turnBlack : turnWhite;
 }
 
-void Game::save(const  string filename)
+bool Game::save(const  string filename)
 {
 	ofstream savefile(filename);
 
 	if (!savefile) {
 		cout << "Unable to save to file : " << filename << endl;
-		return;
+		return false;
 	}
 
 	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
@@ -45,15 +45,16 @@ void Game::save(const  string filename)
 				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << ' ';
 		}
 	}
+	return true;
 }
 
-void Game::load(const string filename)
+bool Game::load(const string filename)
 {
 	ifstream loadfile(filename);
 
 	if (!loadfile) {
 		cout << "Unable to load from file : " << filename << endl;
-		return;
+		return false;
 	}
 
 	clear(); // clear game
@@ -68,11 +69,12 @@ void Game::load(const string filename)
 			cout << chunk << endl;
 			place(d, box[chunk], unique_ptr<string>(new string(chunk)));
 		}
+		return true;
 	}
 	catch (string e) {
 		cout << "Exception being handled" << endl;
 		cout << e << endl;
-		return;
+		return false;
 	}
 }
 
@@ -83,7 +85,7 @@ bool Game::place(const Coordinate & destination, unique_ptr<Piece>& _Piece, uniq
 		board[destination] = std::move(_Piece); // this destroys piece already at destination
 		                                // and puts piece there
 		b_map[destination.x][destination.y] = std::move(_Key);
-		++nturn;
+		
 	}
 	return coordinate_valid;
 }
@@ -101,14 +103,21 @@ bool Game::place(const Coordinate & destination, const std::string & _CommonName
 
 bool Game::validate_move(const Coordinate & source, const Coordinate & destination)
 {
+	// check if coordinate source is actually a piece
+	if (!board[source])
+		return false;
+
 	if (!board.valid_coordinate(source) || !board.valid_coordinate(destination))
 		return false;
 
-	if (turn == true && board[source]->color() == PieceOut::white)
+	if (turn == true && board[source]->color() == PieceOut::white) {
 		return false;
+	}
 
-	if (turn == false && board[source]->color() == PieceOut::black)
+	if (turn == false && board[source]->color() == PieceOut::black) {
 		return false;
+	}
+	
 
 	// special case : Pawn
 	bool BP = false;
@@ -142,6 +151,7 @@ bool Game::validate_move(const Coordinate & source, const Coordinate & destinati
 	else
 		return board.validate_move(source, destination)
 			&& board[source]->validate_move(source, destination);
+	
 }
 
 bool Game::move(const Coordinate & s, const Coordinate & d)
@@ -150,6 +160,8 @@ bool Game::move(const Coordinate & s, const Coordinate & d)
 	if (valid) {
 		board[d] = std::move(board[s]);
 		b_map[d.x][d.y] = std::move(b_map[s.x][s.y]);
+		++nturn;
+		turn = !turn;
 	}
 	return valid;
 }
