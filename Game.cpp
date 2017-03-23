@@ -1,6 +1,9 @@
 #include "Game.h"
 #include <vector>
 #include <iostream>
+#include <string>
+#include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -13,20 +16,71 @@ Game::~Game()
 {
 }
 
-bool Game::place(const Coordinate & destination, Piece * _Piece)
+void Game::save(const char * filename)
+{
+	ofstream savefile(filename);
+
+	if (!savefile) {
+		cout << "Unable to save to file : " << filename << endl;
+		return;
+	}
+
+	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
+		for (size_t y = 0; y < Board::chess_board_size_second; ++y) {
+			if (b_map[x][y] != nullptr)
+				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << endl;
+		}
+	}
+}
+
+bool Game::place(const Coordinate & destination, unique_ptr<Piece>& _Piece, unique_ptr<string>& _Key)
 {
 	bool coordinate_valid = board.valid_coordinate(destination);
 	if (coordinate_valid) {
-		board[destination].reset(_Piece); // this destroys piece already at destination
+		board[destination] = std::move(_Piece); // this destroys piece already at destination
 		                                // and puts piece there
+		b_map[destination.x][destination.y] = std::move(_Key);
 	}
 	return coordinate_valid;
 }
 
 bool Game::validate_move(const Coordinate & source, const Coordinate & destination)
 {
-	return board.validate_move(source, destination)
-		&& board[source]->validate_move(source, destination);
+	if (!board.valid_coordinate(source) || !board.valid_coordinate(destination))
+		return false;
+
+	// special case : Pawn
+	bool BP = false;
+	bool WP = false;
+	if ( (BP = (*(b_map[source.x][source.y]) == "BP"))
+		|| (WP = (*(b_map[source.x][source.y]) == "WP"))) {
+	
+		if (!board[source]->validate_move(source, destination)) {
+			return false;
+		}
+		int dx = destination.x - source.x;
+		int dy = destination.y - source.y;
+
+		if (dx == 0) { // move
+			if (board[destination] != nullptr) // obstructed
+				return false;
+		}
+		else { // possible take
+			if (board[destination] == nullptr) // nothing to take
+				return false;
+			else if (board[destination]->color() == PieceOut::black && BP) { // black obstructed by black
+				return false;
+			}
+			else if (board[destination]->color() == PieceOut::white && WP) { // white obstructed by white
+				return false;
+			}
+		}
+
+		return true;
+	}
+	else
+		return board.validate_move(source, destination)
+			&& board[source]->validate_move(source, destination);
 }
 
 bool Game::move(const Coordinate & s, const Coordinate & d)
@@ -34,6 +88,7 @@ bool Game::move(const Coordinate & s, const Coordinate & d)
 	bool valid = validate_move(s, d);
 	if (valid) {
 		board[d] = std::move(board[s]);
+		b_map[d.x][d.y] = std::move(b_map[s.x][s.y]);
 	}
 	return valid;
 }
@@ -80,6 +135,8 @@ public:
 
 void Game::draw()
 {
+	bool coordinate_marker = true;
+
 	const size_t black = 0;
 	const size_t white = 1;
 	const unsigned char border[2][7] = {
@@ -89,15 +146,28 @@ void Game::draw()
 		//{ 218, 196, 191, 179, 217, 192, 32 }
 		
 	};
-	R cell_regionist(cell_height, cell_width);
-
 	const unsigned char board_border[6] = {
 		218, 196, 191, 179, 217, 192
 	}; // no need for interior, just borders
 
-	const size_t b_width = Board::chess_board_size_second * cell_width + 2;
-	const size_t b_height = Board::chess_board_size_first * cell_height + 2;
+	size_t b_width = Board::chess_board_size_second * cell_width + 2;
+	size_t b_height = Board::chess_board_size_first * cell_height + 2;
+
+	R cell_regionist(cell_height, cell_width);
 	R board_regionist(b_height, b_width);
+
+
+	if (coordinate_marker) {
+		cout << ' ';
+		for (size_t x = 0; x < Board::chess_board_size_second; ++x) {
+			for (size_t i = 0; i < cell_width; ++i) {
+				if (i == cell_width / 2) cout << x;
+				else cout << ' ';
+			}
+		}
+		cout << endl << ' ';
+	}
+
 
 	size_t b_h = 0;
 	for (size_t b_w = 0; b_w < b_width; ++b_w) {
@@ -119,9 +189,11 @@ void Game::draw()
 		for (size_t j = 0; j < cell_height; ++j) {
 
 			// line start here
-			cout << board_border[R::vertical_side];
+			
 			bool middle = (j == cell_height / 2); // if j is at about middle of the cell (height - wise)
-
+			if (coordinate_marker && middle) cout << y;
+			else if (coordinate_marker) cout << ' ';
+			cout << board_border[R::vertical_side];
 			
 			for (size_t x = 0; x < Board::chess_board_size_second; ++x) { // traverse board -- left-right
 																		  // determine cell color
@@ -135,7 +207,7 @@ void Game::draw()
 						&& p == R::vertical_side
 						&& middle) {
 						cout << border[color][R::vertical_side]
-							<< (board[{x, y}]->Symbol())
+							<< (board[{x,y}]->Symbol())
 							<< border[color][R::vertical_side];
 						break; // this cell line unit done
 					}
@@ -145,19 +217,38 @@ void Game::draw()
 				}	
 			}
 
+
+			if (coordinate_marker && middle) cout << board_border[R::vertical_side] << y;
+			else 
 			// j is a line
-			cout << board_border[R::vertical_side] << endl;
+			cout << board_border[R::vertical_side];
+
+			cout << endl;
 			// line end here
 			               // this line unit done
 						  // line break
 		}
 	}
 	
+	if (coordinate_marker) cout << ' ';
+
 	b_h = b_height - 1;
 	for (size_t b_w = 0; b_w < b_width; ++b_w) {
 		cout << board_border[board_regionist.position(b_h, b_w)];
 	} cout << endl;
 	
+
+	if (coordinate_marker) {
+		cout << ' ';
+		for (size_t x = 0; x < Board::chess_board_size_second; ++x) {
+			for (size_t i = 0; i < cell_width; ++i) {
+				if (i == cell_width / 2) cout << x;
+				else cout << ' ';
+			}
+		}
+		cout << endl;
+	}
+
 	 // (i,j) maps printed cell (including borders)
 	// each character is a (i,j)
 

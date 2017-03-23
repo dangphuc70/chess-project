@@ -1,15 +1,16 @@
 #pragma once
 #include "Piece.h"
-class Rook : public Piece
+
+class King : public Piece
 {
 public:
-	Rook(const std::string& _Symbol, PieceOut::Color _Color);
-	virtual ~Rook();
+	King(const std::string& _Symbol, PieceOut::Color _Color);
+	~King();
 	virtual Piece * clone() const;
+
 
 public:
 	//PieceOut
 	bool validate_move(const Coordinate& _sour, const Coordinate& _dest);
-
 };
 

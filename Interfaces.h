@@ -8,7 +8,6 @@ public:
 	virtual bool validate_move(const Coordinate& _sour, const Coordinate& _dest) = 0;
 	enum Color { black, white };
 	virtual Color color() = 0;
-	virtual const std::string& name() = 0;
 };
 
 class BoardOut
