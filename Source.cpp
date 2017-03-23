@@ -14,9 +14,7 @@ class Menu
 public:
 	Menu(Game * game);
 	~Menu();
-	
 	bool input();
-
 private:
 	Game * game_;
 
@@ -31,7 +29,6 @@ void main()
 		Menu menu(&game);
 		game.draw();
 		while (menu.input());
-
 		cout << "Goodbye" << endl;
 	}
 	_CrtDumpMemoryLeaks();
@@ -56,17 +53,20 @@ bool Menu::input()
 		game_->move(c.from(), c.to());
 		game_->draw();
 		break;
+
 	case CommandArgument::show:
 		game_->draw();
-		cout << game_->Turn() << " move" << endl;
-		cout << "number of turn" << game_->numberOfTurn() << endl;
+		cout << ">> " << game_->Turn() << " move" << endl;
+		cout << ">> " << "number of turn : " << game_->numberOfTurn() << endl;
 		break;
+
 	case CommandArgument::newgame:
 		game_->clear();
 		game_->load("hello.txt");
 		cout << "New game" << endl;
 		game_->draw();
 		break;
+
 	case CommandArgument::save:
 		if (game_->save(c.filename())) {
 			cout << "Saved successfully to : " << c.filename() << endl;
@@ -75,6 +75,7 @@ bool Menu::input()
 			cout << "Saving unsuccessful : possible reason : failed when opening file " << c.filename() << endl;
 		}
 		break;
+
 	case CommandArgument::load:
 		if (game_->load(c.filename())) {
 			cout << "Load successfully from : " << c.filename() << endl;
@@ -101,9 +102,11 @@ bool Menu::input()
 			<< " quit           -- quit game" << endl;
 		cout << "You can try out these commands sequential to see their functions" << endl;
 		break;
+
 	case CommandArgument::quit:
 		return false;
 		break;
+
 	case CommandArgument::epsilon:
 		break;
 	}
