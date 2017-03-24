@@ -9,10 +9,15 @@
 
 using namespace std;
 
-Game::Game(int c_h, int c_w) : cell_height(c_h), cell_width(c_w), box(),
-turn(false), nturn(0)
+Game::Game(int c_h, int c_w) 
+	:
+	cell_height(c_h),
+	cell_width(c_w),
+	box(), 
+	turn(false),
+	nturn(0)
 {
-	load("hello.txt");
+	load("newgame.txt");
 }
 
 
@@ -44,7 +49,7 @@ bool Game::save(const string filename)
 		return false;
 	}
 
-	cout << "Saving..." << endl;
+	cout << "Saving... to " << filename << endl;
 
 	savefile << *this;
 
@@ -69,7 +74,7 @@ bool Game::load(const string filename)
 	}
 
 	//clear(); // clear game
-	cout << "Loading..." << endl;
+	cout << "Loading... from " << filename << endl;
 
 	/*loadfile >> turn >> nturn;
 	try {
@@ -285,7 +290,7 @@ void Game::draw()
 
 
 	if (coordinate_marker) {
-		cout << ' ';
+		cout << "  ";
 		for (int x = 0; x < Board::chess_board_size_second; ++x) {
 			for (int i = 0; i < cell_width; ++i) {
 				if (i - 1 == cell_width / 2) cout << char('a' + x);
@@ -297,6 +302,7 @@ void Game::draw()
 
 
 	int b_h = 0;
+	cout << ' ';
 	for (int b_w = 0; b_w < b_width; ++b_w) {
 		cout << board_border[board_regionist.position(b_h, b_w)];
 	} cout << endl;
@@ -316,7 +322,9 @@ void Game::draw()
 		for (int j = 0; j < cell_height; ++j) {
 
 			// line start here
-			
+			cout << ' ';
+
+
 			bool middle = (j == cell_height / 2); // if j is at about middle of the cell (height - wise)
 			if (coordinate_marker && middle) cout << (8-y);
 			else if (coordinate_marker) cout << ' ';
@@ -360,13 +368,14 @@ void Game::draw()
 	if (coordinate_marker) cout << ' ';
 
 	b_h = b_height - 1;
+	cout << ' ';
 	for (int b_w = 0; b_w < b_width; ++b_w) {
 		cout << board_border[board_regionist.position(b_h, b_w)];
 	} cout << endl;
 	
 
 	if (coordinate_marker) {
-		cout << ' ';
+		cout << "  ";
 		for (int x = 0; x < Board::chess_board_size_second; ++x) {
 			for (int i = 0; i < cell_width; ++i) {
 				if (i - 1 == cell_width / 2) cout << char('a' + x);
