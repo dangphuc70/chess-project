@@ -9,9 +9,10 @@
 
 using namespace std;
 
-Game::Game(int c_h, int c_w) : cell_height(c_h), cell_width(c_w), box(),
-turn(false), nturn(0)
+Game::Game(int c_h, int c_w) : cell_height(c_h), cell_width(c_w),
+turn(false), nturn(0), box()
 {
+
 	load("hello.txt");
 }
 
@@ -514,7 +515,7 @@ ostream & operator<<(ostream & o, const Game & g)
 	for (int x = 0; x < Board::chess_board_size_first; ++x) {
 		for (int y = 0; y < Board::chess_board_size_second; ++y) {
 			if (g.b_map[x][y] != nullptr)
-				o << Coordinate(x, y) << *(g.b_map[x][y]) << ';';
+				o << Coordinate(x, y) << ' ' << *(g.b_map[x][y]) << ' ';
 		}
 	}
 	o << endl;
@@ -526,24 +527,17 @@ ostream & operator<<(ostream & o, const Game & g)
 istream & operator >> (istream & i, Game & g)
 {
 	i >> g.turn >> g.nturn;
-	string l;
-	getline(i, l);
-	istringstream b(l);
+	
 	Coordinate c;
 	string na;
-	g.clear();
-	while (b) {
-		b >> c >> na;
-
+	while (i) {
+		i >> c >> na;
 		cout << c << endl;
 		cout << na << endl;
-
 		g.place(c, na);
 	}
-
-	getline(i, l);
-	b.str(l);
+/*
 	g.history.clear();
-	b >> g.history;
+	i >> g.history;*/
 	return i;
 }
