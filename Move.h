@@ -6,10 +6,10 @@ using namespace std;
 class Move
 {
 	friend ostream& operator<<(ostream& o, const Move& m);
-	friend istream& operator >> (istream& i, Move& m);
+	friend istream& operator>> (istream& i, Move& m);
 public:
-	Move(const Coordinate& _From,
-		const Coordinate& _To,
+	Move(const Coordinate& _From = { 0, 0 },
+		const Coordinate& _To = { 0, 0 },
 		const string & _MovePiece = "",
 		const string & _TakenPiece = "");
 

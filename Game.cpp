@@ -32,10 +32,10 @@ const string & Game::Turn()
 
 const Move & Game::LastMove() const
 {
-	return *history.rbegin();
+	return history.LastMove();
 }
 
-bool Game::save(const  string filename)
+bool Game::save(const string filename)
 {
 	ofstream savefile(filename);
 
@@ -205,7 +205,7 @@ bool Game::move(const Coordinate & s, const Coordinate & d)
 		if (board[d]) { // if this is a take move
 			t = *(b_map[d.x][d.y]); // record name of taken piece
 		}
-		history.push_back(Move(s,d,m,t));
+		history.Add(Move(s,d,m,t));
 		board[d] = std::move(board[s]);
 		b_map[d.x][d.y] = std::move(b_map[s.x][s.y]);
 		++nturn;
@@ -530,4 +530,40 @@ R::where R::position(int i, int j)
 		return inside;
 }
 
+ostream & operator<<(ostream & o, const Game & g)
+{
+	o << g.turn << endl;
+	o << g.nturn << endl;
+	for (int x = 0; x < Board::chess_board_size_first; ++x) {
+		for (int y = 0; y < Board::chess_board_size_second; ++y) {
+			if (g.b_map[x][y] != nullptr)
+				o << Coordinate(x,y) << *(g.b_map[x][y]) << ' ';
+		}
+	}
+	o << endl;
+	o << g.history;
 
+	return o;
+}
+
+istream & operator >> (istream & i, Game & g)
+{
+	i >> g.turn >> g.nturn;
+	string l;
+	getline(i, l);
+	istringstream b(l);
+	Coordinate c;
+	string na;
+	g.clear();
+	while (b) {
+		b >> c;
+		b >> na;
+		g.place(c, na);
+	}
+
+	getline(i, l);
+	b.str(l);
+	g.history.clear();
+	b >> g.history;
+	return i;
+}

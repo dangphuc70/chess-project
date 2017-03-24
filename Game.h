@@ -4,9 +4,13 @@
 #include "PieceBox.h"
 #include <vector>
 #include "Move.h"
+#include "History.h"
+#include <iostream>
 
 class Game
 {
+	friend ostream& operator<<(ostream& o, const Game& g);
+	friend istream& operator >> (istream& i, Game& g);
 public:
 	Game(int c_h=3, int c_w=7);
 	~Game();
@@ -27,7 +31,7 @@ private:
 	Board board;
 	std::unique_ptr<std::string> b_map[Board::chess_board_size_first][Board::chess_board_size_second];
 
-	std::vector<Move> history;
+	History history;
 
 public:
 	bool place(const Coordinate& destination, std::unique_ptr<Piece>& _Piece, std::unique_ptr<std::string>& _CommonName);

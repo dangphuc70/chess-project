@@ -32,8 +32,8 @@ string Move::toString() const
 {
 
 	return commonName_ +
-		"," + from_.toCommonCoordinate() +
-		"," + to_.toCommonCoordinate() +
+		',' + from_.toCommonCoordinate() +
+		',' + to_.toCommonCoordinate() +
 		';' +
 		taken_;
 }
@@ -50,21 +50,15 @@ bool Move::empty() const
 
 ostream & operator<<(ostream & o, const Move & m)
 {
-	o << m.commonName_ << endl;
-	o << m.from_;
-	o << ' ' << m.to_;
+	o << m.commonName_ << ' ';
+	o << m.from_ << ' ';
+	o << m.to_ << ' ';
 	o << m.taken_ << endl;
 	return o;
 }
 
 istream & operator >> (istream & i, Move & m)
 {
-	string s;
-	getline(i, s);
-	m.commonName_ = s;
-	i >> m.from_;
-	i >> m.to_;
-	getline(i, s);
-	m.taken_ = s;
+	i >> m.commonName_ >> m.from_ >> m.to_ >> m.taken_;
 	return i;
 }
