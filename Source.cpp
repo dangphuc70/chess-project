@@ -99,16 +99,16 @@ bool Menu::input()
 	
 	case CommandArgument::help:
 		cout << "Help Page" << endl;
-		cout << "Example:" << endl;
-		cout << "These are example of all possible commands" << endl 
-			<< " move b3 b7" << endl
-			<< " show           -- show the current board, current turn (black or white), number of turn" << endl
-			<< " save save1.txt -- save current game to file (path) \"save1.txt\"" << endl
-			<< " new            -- load a new game -- this does not save current game" << endl
-			<< " load save1.txt -- load a game from file (path) \"save1.txt\"" << " -- this does not save current game" << endl
-			<< " help           -- show this help page" << endl
-			<< " quit           -- quit game" << endl;
-		cout << "You can try out these commands sequential to see their functions" << endl;
+		cout << " Guide" << endl;
+		cout << " These are examples of all possible commands" << endl 
+			<< "  move b3 b7" << endl
+			<< "  show           -- show the current board, current turn (black or white), number of turn" << endl
+			<< "  save save1.txt -- save current game to file (path) \"save1.txt\"" << endl
+			<< "  new            -- load a new game -- this does not save current game" << endl
+			<< "  load save1.txt -- load a game from file (path) \"save1.txt\"" << " -- this does not save current game" << endl
+			<< "  help           -- show this help page" << endl
+			<< "  quit           -- quit game" << endl;
+		cout << " You can try out these commands sequential to see their functions" << endl;
 		break;
 
 	case CommandArgument::quit:
