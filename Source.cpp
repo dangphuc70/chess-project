@@ -12,12 +12,13 @@
 class Menu
 {
 public:
-	Menu(Game * game);
+	Menu(Game * game, int lines=32);
 	~Menu();
 	bool input();
+	void clearScreen();
 private:
 	Game * game_;
-
+	int linesClearScreen;
 };
 
 
@@ -28,6 +29,7 @@ void main()
 		Game game;
 		Menu menu(&game);
 		game.draw();
+		cout << ">> " << game.Turn() << " move" << endl;
 		while (menu.input());
 		cout << "Goodbye" << endl;
 	}
@@ -35,7 +37,7 @@ void main()
 	system("PAUSE");
 }
 
-Menu::Menu(Game * game) : game_(game)
+Menu::Menu(Game * game, int lines) : game_(game), linesClearScreen(lines)
 {
 }
 
@@ -50,11 +52,17 @@ bool Menu::input()
 	CommandArgument c(command);
 	switch (c.type()) {
 	case CommandArgument::move:
-		game_->move(c.from(), c.to());
-		game_->draw();
+		if (game_->move(c.from(), c.to())) {
+			clearScreen();
+			game_->draw();
+			cout << "New move made : "
+				<< (game_->LastMove()).toString() << endl;
+			cout << ">> " << game_->Turn() << " move" << endl;
+		}
 		break;
 
 	case CommandArgument::show:
+		clearScreen();
 		game_->draw();
 		cout << ">> " << game_->Turn() << " move" << endl;
 		cout << ">> " << "number of turn : " << game_->numberOfTurn() << endl;
@@ -111,4 +119,10 @@ bool Menu::input()
 		break;
 	}
 	return true;
+}
+
+void Menu::clearScreen()
+{
+	for (int i = 0; i < linesClearScreen; ++i)
+		cout << endl;
 }

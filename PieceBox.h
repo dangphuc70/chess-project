@@ -22,7 +22,12 @@ public:
 
 
 private:
-	map<string, unique_ptr<Piece>> box;
+	typedef string _CommonName;
+	map<_CommonName, unique_ptr<Piece>> box;
+
+
+	// for ease of syntax
+	void Insert(const string & key, Piece * p);
 
 };
 

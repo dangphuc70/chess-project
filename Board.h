@@ -7,8 +7,8 @@
 class Board : public BoardOut
 {
 public:
-	static const size_t chess_board_size_first = 8;
-	static const size_t chess_board_size_second = 8;
+	static const int chess_board_size_first = 8;
+	static const int chess_board_size_second = 8;
 private:
 	std::unique_ptr<Piece> board[chess_board_size_first][chess_board_size_second];
 

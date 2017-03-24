@@ -1,12 +1,19 @@
 #pragma once
+#include <iostream>
+#include <string>
+using namespace std;
 class Coordinate
 {
+	friend ostream& operator<<(ostream& o, const Coordinate& m);
+	friend istream& operator>>(istream& i, Coordinate& m);
 public:
-	Coordinate(size_t x0=0, size_t y0=0);
+	Coordinate(int x0=0, int y0=0);
 	~Coordinate();
 
-	size_t x;
-	size_t y;
+	string toCommonCoordinate() const;
+
+	int x;
+	int y;
 
 	bool operator==(const Coordinate& _Second) const;
 	bool operator!=(const Coordinate& _Second) const;

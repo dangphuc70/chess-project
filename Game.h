@@ -2,16 +2,19 @@
 #include "Board.h"
 #include "Piece.h"
 #include "PieceBox.h"
+#include <vector>
+#include "Move.h"
 
 class Game
 {
 public:
-	Game(size_t c_h=3, size_t c_w=7);
+	Game(int c_h=3, int c_w=7);
 	~Game();
 
 public:
 	int numberOfTurn();
 	const string & Turn();
+	const Move& LastMove() const;
 
 public:
 	bool save(const string filename);
@@ -23,6 +26,9 @@ private:
 	PieceBox box;
 	Board board;
 	std::unique_ptr<std::string> b_map[Board::chess_board_size_first][Board::chess_board_size_second];
+
+	std::vector<Move> history;
+
 public:
 	bool place(const Coordinate& destination, std::unique_ptr<Piece>& _Piece, std::unique_ptr<std::string>& _CommonName);
 	bool place(const Coordinate& destination, const std::string & _CommonName);
@@ -30,15 +36,17 @@ public:
 	bool move(const Coordinate& source, const Coordinate& destination);
 	void draw();
 	void clear();
-	Coordinate to_coordinate(char letter, size_t number);
+	Coordinate to_coordinate(char letter, int number);
+
 private:
-	size_t cell_height; // for text render
-	size_t cell_width; // for text render
+	int cell_height; // for text render
+	int cell_width; // for text render
 	bool black_cell(const Coordinate& coor);
 
 private:
 	const string turnBlack = "black";
 	const string turnWhite = "white";
-	
+	bool PieceOnStraightPath(const Coordinate& start, const Coordinate& end);
+	bool PieceOnDiagonalPath(const Coordinate& start, const Coordinate& end);
 };
 

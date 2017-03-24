@@ -9,7 +9,7 @@
 
 using namespace std;
 
-Game::Game(size_t c_h, size_t c_w) : cell_height(c_h), cell_width(c_w), box(),
+Game::Game(int c_h, int c_w) : cell_height(c_h), cell_width(c_w), box(),
 turn(false), nturn(0)
 {
 	load("hello.txt");
@@ -30,6 +30,11 @@ const string & Game::Turn()
 	return turn ? turnBlack : turnWhite;
 }
 
+const Move & Game::LastMove() const
+{
+	return *history.rbegin();
+}
+
 bool Game::save(const  string filename)
 {
 	ofstream savefile(filename);
@@ -41,12 +46,14 @@ bool Game::save(const  string filename)
 
 	cout << "Saving..." << endl;
 
-	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
-		for (size_t y = 0; y < Board::chess_board_size_second; ++y) {
+	savefile << turn << nturn;
+	for (int x = 0; x < Board::chess_board_size_first; ++x) {
+		for (int y = 0; y < Board::chess_board_size_second; ++y) {
 			if (b_map[x][y] != nullptr)
 				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << ' ';
 		}
 	}
+	savefile << endl;
 	return true;
 }
 
@@ -61,6 +68,8 @@ bool Game::load(const string filename)
 
 	clear(); // clear game
 	cout << "Loading..." << endl;
+
+	loadfile >> turn >> nturn;
 	try {
 		Coordinate d = { 0, 0 };
 		string chunk;
@@ -105,33 +114,64 @@ bool Game::place(const Coordinate & destination, const std::string & _CommonName
 
 bool Game::validate_move(const Coordinate & source, const Coordinate & destination)
 {
-	// check if coordinate source is actually a piece
-	if (!board[source])
-		return false;
 
 	if (!board.valid_coordinate(source) || !board.valid_coordinate(destination))
 		return false;
 
-	if (turn == true && board[source]->color() == PieceOut::white) {
+	if (!board[source]) // no piece at coordinate source
+		return false;
+
+	if (turn == true && board[source]->color() == PieceOut::white) { // wrong turn (black's turn, move white piece)
 		return false;
 	}
 
-	if (turn == false && board[source]->color() == PieceOut::black) {
+	if (turn == false && board[source]->color() == PieceOut::black) { // wrong turn (white's, black)
 		return false;
 	}
 	
+	// obstruction : path through a piece
+	// paths that can be 'through'-obstructed include : straight, diagonal
+	// paths at least 2 cell long
 
-	// special case : Pawn
+	// analyze path
+	int dx = destination.x - source.x;
+	int dy = destination.y - source.y;
+
+	// straight path
+	if ( (dx == 0 && abs(dy) > 1) || (dy == 0 && abs(dx) > 1) ){
+		if (PieceOnStraightPath(source, destination))
+			return false;
+	}
+
+	// diagonal path
+	if (dx == dy && abs(dx) > 1) {
+		if (PieceOnDiagonalPath(source, destination))
+			return false;
+	}
+
+
+	// special case : Pawn ( very context(board scene) dependent )
 	bool BP = false;
 	bool WP = false;
-	if ( (BP = (*(b_map[source.x][source.y]) == "BP"))
-		|| (WP = (*(b_map[source.x][source.y]) == "WP"))) {
-	
-		if (!board[source]->validate_move(source, destination)) {
+	if
+		( 
+			( BP = (*(b_map[source.x][source.y]) == "BP" )) // want to move a black pawn
+		||	( WP = (*(b_map[source.x][source.y]) == "WP" )) // or want to move a white pawn
+		) {
+		if (dx == 0) { // possible starting move
+			if (WP && source.y == 6) { // indeed starting move,
+				if (dy == -2) // starting move: white pawn move down 2 cells
+					return true;
+			}
+			else if (BP && source.y == 1) { // black pawn starting move
+				if (dy == 2) // black pawn move up 2 cells
+					return true;
+			}
+		}
+
+		if (!board[source]->validate_move(source, destination)) { // normal move is invalid anyway
 			return false;
 		}
-		int dx = destination.x - source.x;
-		int dy = destination.y - source.y;
 
 		if (dx == 0) { // move
 			if (board[destination] != nullptr) // obstructed
@@ -160,6 +200,12 @@ bool Game::move(const Coordinate & s, const Coordinate & d)
 {
 	bool valid = validate_move(s, d);
 	if (valid) {
+		string m( *(b_map[s.x][s.y]) );
+		string t;
+		if (board[d]) { // if this is a take move
+			t = *(b_map[d.x][d.y]); // record name of taken piece
+		}
+		history.push_back(Move(s,d,m,t));
 		board[d] = std::move(board[s]);
 		b_map[d.x][d.y] = std::move(b_map[s.x][s.y]);
 		++nturn;
@@ -174,7 +220,7 @@ bool Game::move(const Coordinate & s, const Coordinate & d)
 class R
 {
 public:
-	R(size_t im, size_t jm, size_t i0 = 0, size_t j0 = 0);
+	R(int im, int jm, int i0 = 0, int j0 = 0);
 	~R();
 
 	
@@ -184,11 +230,11 @@ public:
 
 
 private:
-	size_t i0;
-	size_t j0;
+	int i0;
+	int j0;
 
-	size_t im;
-	size_t jm;
+	int im;
+	int jm;
 
 public:
 	enum where {
@@ -204,7 +250,7 @@ public:
 
 	};
 
-	where position(size_t i, size_t j);
+	where position(int i, int j);
 };
 
 
@@ -212,8 +258,8 @@ void Game::draw()
 {
 	bool coordinate_marker = true;
 
-	const size_t black = 0;
-	const size_t white = 1;
+	const int black = 0;
+	const int white = 1;
 	const unsigned char border[2][7] = {
 		{ 176, 176, 176, 176, 176, 176, 176 },
 		//{201, 205, 187, 186, 188, 200, 32},
@@ -225,8 +271,8 @@ void Game::draw()
 		218, 196, 191, 179, 217, 192
 	}; // no need for interior, just borders
 
-	size_t b_width = Board::chess_board_size_second * cell_width + 2;
-	size_t b_height = Board::chess_board_size_first * cell_height + 2;
+	int b_width = Board::chess_board_size_second * cell_width + 2;
+	int b_height = Board::chess_board_size_first * cell_height + 2;
 
 	R cell_regionist(cell_height, cell_width);
 	R board_regionist(b_height, b_width);
@@ -234,8 +280,8 @@ void Game::draw()
 
 	if (coordinate_marker) {
 		cout << ' ';
-		for (size_t x = 0; x < Board::chess_board_size_second; ++x) {
-			for (size_t i = 0; i < cell_width; ++i) {
+		for (int x = 0; x < Board::chess_board_size_second; ++x) {
+			for (int i = 0; i < cell_width; ++i) {
 				if (i == cell_width / 2) cout << char('a' + x);
 				else cout << ' ';
 			}
@@ -244,8 +290,8 @@ void Game::draw()
 	}
 
 
-	size_t b_h = 0;
-	for (size_t b_w = 0; b_w < b_width; ++b_w) {
+	int b_h = 0;
+	for (int b_w = 0; b_w < b_width; ++b_w) {
 		cout << board_border[board_regionist.position(b_h, b_w)];
 	} cout << endl;
 
@@ -256,12 +302,12 @@ void Game::draw()
 	//everything is nearly concatenable (vertically)
 	//a picture would explain better (unfortunately not provided)
 
-	size_t color = 0;
+	int color = 0;
 	// notes about (i,j) and (x,y) at end of scope
-	for (size_t y = 0; y < Board::chess_board_size_first; ++y) { // traverse board -- up-down
+	for (int y = 0; y < Board::chess_board_size_first; ++y) { // traverse board -- up-down
 		
 		// render line-by-line
-		for (size_t j = 0; j < cell_height; ++j) {
+		for (int j = 0; j < cell_height; ++j) {
 
 			// line start here
 			
@@ -270,13 +316,13 @@ void Game::draw()
 			else if (coordinate_marker) cout << ' ';
 			cout << board_border[R::vertical_side];
 			
-			for (size_t x = 0; x < Board::chess_board_size_second; ++x) { // traverse board -- left-right
+			for (int x = 0; x < Board::chess_board_size_second; ++x) { // traverse board -- left-right
 																		  // determine cell color
 																		  // x and y are both determined here
 				color = (black_cell({ x,y })) ? (0) : (1);
 				// 0 : black
 				// 1 : white
-				for (size_t i = 0; i < cell_width; ++i) {
+				for (int i = 0; i < cell_width; ++i) {
 					R::where p = cell_regionist.position(j, i);
 					if (board[{x, y}] != nullptr
 						&& p == R::vertical_side
@@ -308,15 +354,15 @@ void Game::draw()
 	if (coordinate_marker) cout << ' ';
 
 	b_h = b_height - 1;
-	for (size_t b_w = 0; b_w < b_width; ++b_w) {
+	for (int b_w = 0; b_w < b_width; ++b_w) {
 		cout << board_border[board_regionist.position(b_h, b_w)];
 	} cout << endl;
 	
 
 	if (coordinate_marker) {
 		cout << ' ';
-		for (size_t x = 0; x < Board::chess_board_size_second; ++x) {
-			for (size_t i = 0; i < cell_width; ++i) {
+		for (int x = 0; x < Board::chess_board_size_second; ++x) {
+			for (int i = 0; i < cell_width; ++i) {
 				if (i == cell_width / 2) cout << char('a' + x);
 				else cout << ' ';
 			}
@@ -333,8 +379,8 @@ void Game::draw()
 
 void Game::clear()
 {
-	for (size_t x = 0; x < Board::chess_board_size_first; ++x) {
-		for (size_t y = 0; y < Board::chess_board_size_second; ++y) {
+	for (int x = 0; x < Board::chess_board_size_first; ++x) {
+		for (int y = 0; y < Board::chess_board_size_second; ++y) {
 			board[{x, y}].reset();
 			b_map[x][y].reset();
 		}
@@ -346,19 +392,60 @@ bool Game::black_cell(const Coordinate & coor)
 	return (coor.x + coor.y) % 2 != 0;
 }
 
-Coordinate Game::to_coordinate(char letter, size_t number)
+bool Game::PieceOnStraightPath(const Coordinate & start, const Coordinate & end)
+{
+	// assume path is straight
+
+	// case 1 : vertical
+	{
+		int y0 = (start.y < end.y) ? (start.y) : (end.y);
+		int yn = (end.y > start.y) ? (end.y) : (start.y);
+		for (int y = y0+1; y < yn; ++y) {
+			if (board[{start.x, y}])
+				return true;
+		}
+	}
+
+	// case 2 : horizontal
+	{
+		int x0 = (start.x < end.x) ? (start.x) : (end.x);
+		int xn = (end.x > start.x) ? (end.x) : (start.x);
+		for (int x = x0 + 1; x < xn; ++x) {
+			if (board[{x, start.y}])
+				return true;
+		}
+	}
+	return false;
+}
+
+bool Game::PieceOnDiagonalPath(const Coordinate & start, const Coordinate & end)
+{
+	// assume path is diagonal
+	int x0 = (start.x < end.x) ? (start.x) : (end.x);
+	int y0 = (start.y < end.y) ? (start.y) : (end.y);
+	int xn = (start.x > end.x) ? (start.x) : (end.x);
+	int yn = (start.y > end.y) ? (start.y) : (end.y);
+
+	for (int x = x0+1, y = y0+1; x < xn, y < yn; ++x, ++y) {
+		if (board[{x, y}])
+			return true;
+	}
+	return false;
+}
+
+Coordinate Game::to_coordinate(char letter, int number)
 {
 	if (letter >= 'a' && letter <= 'h') {
 		if (number >= 1 && number <= 8) {
-			return {size_t(letter-'a'), 8-number};
+			return {letter-'a', 8-number};
 		}
 	}
-	return {0,0};
+	return {8,8};
 }
 
 
 
-R::R(size_t im, size_t jm, size_t i0, size_t j0)
+R::R(int im, int jm, int i0, int j0)
 {
 	if (im > i0 && jm > j0) {
 		this->i0 = i0;
@@ -386,9 +473,9 @@ void R::draw()
 	const unsigned char b_left = 192, b_right = 217;
 
 	using namespace std;
-	for (size_t i = i0; i <= im; ++i)
+	for (int i = i0; i <= im; ++i)
 	{
-		for (size_t j = j0; j <= jm; ++j)
+		for (int j = j0; j <= jm; ++j)
 		{
 			switch (position(i, j))
 			{
@@ -423,7 +510,7 @@ void R::draw()
 
 }
 
-R::where R::position(size_t i, size_t j)
+R::where R::position(int i, int j)
 {
 	if (i == i0 && j == j0)
 		return top_left;

@@ -10,6 +10,8 @@ CommandArgument::CommandArgument(const string & command, const char delim)
 	string chunk1, chunk2;
 	istringstream comm(command);
 
+	
+
 	getline(comm, chunk, delim);
 	if (chunk == "move") {
 		type_ = move;
@@ -20,11 +22,19 @@ CommandArgument::CommandArgument(const string & command, const char delim)
 		else if (!isalpha(chunk1[0]) || !isalpha(chunk2[0])) {
 			type_ = epsilon;
 		}
-		else if (!isdigit(chunk2[1]) || !isdigit(chunk2[1])) {
+		else if (!isdigit(chunk1[1]) || !isdigit(chunk2[1])) {
 			type_ = epsilon;
 		}
-		from_ = Coordinate(chunk1[0] - 'a', 8 - (chunk1[1] - '0'));
-		to_ = Coordinate( chunk2[0] - 'a', 8 - (chunk2[1] - '0') );
+		else if (chunk1[0] < 'a' || chunk1[0] > 'h' || chunk2[0] < 'a' || chunk2[0] > 'h') {
+			type_ = epsilon;
+		}
+		else if (chunk1[1] < '1' || chunk1[1] > '8' || chunk2[1] < '1' || chunk2[1] > '8') {
+			type_ = epsilon;
+		}
+		else {
+			from_ = Coordinate(chunk1[0] - 'a', 8 - (chunk1[1] - '0'));
+			to_ = Coordinate(chunk2[0] - 'a', 8 - (chunk2[1] - '0'));
+		}
 		
 	}
 	else if (chunk == "show") {
@@ -49,6 +59,29 @@ CommandArgument::CommandArgument(const string & command, const char delim)
 	}
 	else if (chunk == "quit") {
 		type_ = quit;
+	}
+	else if (chunk.length() == 2) { // suspected shorthand move command : b2 b7
+		type_ = move;
+			getline(comm, chunk2, delim);
+
+			if (chunk2.length() != 2)
+				type_ = epsilon;
+			else if (!isalpha(chunk[0]) || !isalpha(chunk2[0])) {
+				type_ = epsilon;
+			}
+			else if (!isdigit(chunk[1]) || !isdigit(chunk2[1])) {
+				type_ = epsilon;
+			}
+			else if (chunk[0] < 'a' || chunk[0] > 'h' || chunk2[0] < 'a' || chunk2[0] > 'h') {
+				type_ = epsilon;
+			}
+			else if (chunk[1] < '1' || chunk[1] > '8' || chunk2[1] < '1' || chunk2[1] > '8') {
+				type_ = epsilon;
+			}
+			else {
+				from_ = Coordinate(chunk[0] - 'a', 8 - (chunk[1] - '0'));
+				to_ = Coordinate(chunk2[0] - 'a', 8 - (chunk2[1] - '0'));
+			}
 	}
 	else {
 		type_ = epsilon;
