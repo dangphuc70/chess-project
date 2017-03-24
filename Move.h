@@ -10,8 +10,8 @@ class Move
 public:
 	Move(const Coordinate& _From = { 0, 0 },
 		const Coordinate& _To = { 0, 0 },
-		const string & _MovePiece = "",
-		const string & _TakenPiece = "");
+		const string & _MovePiece = "e",
+		const string & _TakenPiece = "e");
 
 	~Move();
 

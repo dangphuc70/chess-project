@@ -34,18 +34,17 @@ string Move::toString() const
 	return commonName_ +
 		',' + from_.toCommonCoordinate() +
 		',' + to_.toCommonCoordinate() +
-		';' +
-		taken_;
+		';' + taken_;
 }
 
 bool Move::isTakeMove() const
 {
-	return taken_.empty() || (taken_.length() == 0);
+	return taken_ == "e";
 }
 
 bool Move::empty() const
 {
-	return commonName_.empty() || (commonName_.length() == 0);
+	return commonName_ == "e";
 }
 
 ostream & operator<<(ostream & o, const Move & m)

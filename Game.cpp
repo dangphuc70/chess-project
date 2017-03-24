@@ -46,14 +46,7 @@ bool Game::save(const string filename)
 
 	cout << "Saving..." << endl;
 
-	savefile << turn << nturn;
-	for (int x = 0; x < Board::chess_board_size_first; ++x) {
-		for (int y = 0; y < Board::chess_board_size_second; ++y) {
-			if (b_map[x][y] != nullptr)
-				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << ' ';
-		}
-	}
-	savefile << endl;
+	savefile << *this;
 	return true;
 }
 
@@ -66,27 +59,11 @@ bool Game::load(const string filename)
 		return false;
 	}
 
-	clear(); // clear game
+
 	cout << "Loading..." << endl;
 
-	loadfile >> turn >> nturn;
-	try {
-		Coordinate d = { 0, 0 };
-		string chunk;
-		while (loadfile) {
-			loadfile >> d.x >> d.y;
-			cout << d.x << ' ' << d.y << endl;
-			loadfile >> chunk;
-			cout << chunk << endl;
-			place(d, box[chunk], unique_ptr<string>(new string(chunk)));
-		}
-		return true;
-	}
-	catch (string e) {
-		cout << "Exception being handled" << endl;
-		cout << e << endl;
-		return false;
-	}
+	loadfile >> *this;
+	return true;
 }
 
 bool Game::place(const Coordinate & destination, unique_ptr<Piece>& _Piece, unique_ptr<string>& _Key)
@@ -537,7 +514,7 @@ ostream & operator<<(ostream & o, const Game & g)
 	for (int x = 0; x < Board::chess_board_size_first; ++x) {
 		for (int y = 0; y < Board::chess_board_size_second; ++y) {
 			if (g.b_map[x][y] != nullptr)
-				o << Coordinate(x,y) << *(g.b_map[x][y]) << ' ';
+				o << Coordinate(x, y) << *(g.b_map[x][y]) << ';';
 		}
 	}
 	o << endl;
@@ -556,8 +533,11 @@ istream & operator >> (istream & i, Game & g)
 	string na;
 	g.clear();
 	while (b) {
-		b >> c;
-		b >> na;
+		b >> c >> na;
+
+		cout << c << endl;
+		cout << na << endl;
+
 		g.place(c, na);
 	}
 
