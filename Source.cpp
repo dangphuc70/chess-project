@@ -16,9 +16,14 @@ public:
 	~Menu();
 	bool input();
 	void clearScreen();
+
+	void ShowGameTurn();
 private:
 	Game * game_;
 	int linesClearScreen;
+
+	const char * messageBullet = "<< ";
+	const char * inputBullet = ">> ";
 };
 
 
@@ -29,7 +34,7 @@ void main()
 		Game game;
 		Menu menu(&game);
 		game.draw();
-		cout << ">> " << game.Turn() << " move" << endl;
+		menu.ShowGameTurn();
 		while (menu.input());
 		cout << "Goodbye" << endl;
 	}
@@ -47,7 +52,10 @@ Menu::~Menu()
 
 bool Menu::input()
 {
+	
+
 	string command;
+	cout << inputBullet;
 	getline(cin, command);
 	CommandArgument c(command);
 	switch (c.type()) {
@@ -57,15 +65,15 @@ bool Menu::input()
 			game_->draw();
 			cout << "New move made : "
 				<< (game_->LastMove()).toString() << endl;
-			cout << ">> " << game_->Turn() << " move" << endl;
+			ShowGameTurn();
 		}
 		break;
 
 	case CommandArgument::show:
 		clearScreen();
 		game_->draw();
-		cout << ">> " << game_->Turn() << " move" << endl;
-		cout << ">> " << "number of turn : " << game_->numberOfTurn() << endl;
+		ShowGameTurn();
+		cout << messageBullet << "number of turn : " << game_->numberOfTurn() << endl;
 		break;
 
 	case CommandArgument::newgame:
@@ -78,6 +86,7 @@ bool Menu::input()
 	case CommandArgument::save:
 		if (game_->save(c.filename())) {
 			cout << "Saved successfully to : " << c.filename() << endl;
+			
 		}
 		else {
 			cout << "Saving unsuccessful : possible reason : failed when opening file " << c.filename() << endl;
@@ -88,6 +97,8 @@ bool Menu::input()
 		if (game_->load(c.filename())) {
 			cout << "Load successfully from : " << c.filename() << endl;
 			game_->draw();
+			ShowGameTurn();
+			cout << messageBullet << "number of turn : " << game_->numberOfTurn() << endl;
 		}
 		else {
 			cout << "Loading unsuccessful : possible reason : failed when opening file "
@@ -125,4 +136,9 @@ void Menu::clearScreen()
 {
 	for (int i = 0; i < linesClearScreen; ++i)
 		cout << endl;
+}
+
+void Menu::ShowGameTurn()
+{
+	cout << messageBullet << game_->Turn() << "'s turn" << endl;
 }

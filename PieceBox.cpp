@@ -10,7 +10,7 @@ PieceBox::PieceBox()
 {
 	PieceOut::Color black = PieceOut::black;
 	PieceOut::Color white = PieceOut::white;
-	Insert("BR", new Rook(" B R ", black));
+	/*Insert("BR", new Rook(" B R ", black));
 	Insert("BN", new Knight(" B N ", black));
 	Insert("BB", new Bishop(" B B ", black));
 	Insert("BQ", new Queen(" B Q ", black));
@@ -22,7 +22,21 @@ PieceBox::PieceBox()
 	Insert("WB", new Bishop(" W B ", white));
 	Insert("WQ", new Queen(" W Q ", white));
 	Insert("WK", new King(" W K ", white));
-	Insert("WP", new Pawn(" W P ", white));
+	Insert("WP", new Pawn(" W P ", white));*/
+
+	Insert("BR", new Rook("  R  ", black));
+	Insert("BN", new Knight("  N  ", black));
+	Insert("BB", new Bishop("  B  ", black));
+	Insert("BQ", new Queen("  Q  ", black));
+	Insert("BK", new King("  K  ", black));
+	Insert("BP", new Pawn("  P  ", black));
+
+	Insert("WR", new Rook("  r  ", white));
+	Insert("WN", new Knight("  n  ", white));
+	Insert("WB", new Bishop("  b  ", white));
+	Insert("WQ", new Queen("  q  ", white));
+	Insert("WK", new King("  k  ", white));
+	Insert("WP", new Pawn("  p  ", white));
 }
 
 

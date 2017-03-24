@@ -46,14 +46,16 @@ bool Game::save(const string filename)
 
 	cout << "Saving..." << endl;
 
-	savefile << turn << nturn;
+	savefile << *this;
+
+	/*savefile << turn << nturn;
 	for (int x = 0; x < Board::chess_board_size_first; ++x) {
 		for (int y = 0; y < Board::chess_board_size_second; ++y) {
 			if (b_map[x][y] != nullptr)
 				savefile << x << ' ' << y << ' ' << *(b_map[x][y]) << ' ';
 		}
 	}
-	savefile << endl;
+	savefile << endl;*/
 	return true;
 }
 
@@ -66,10 +68,10 @@ bool Game::load(const string filename)
 		return false;
 	}
 
-	clear(); // clear game
+	//clear(); // clear game
 	cout << "Loading..." << endl;
 
-	loadfile >> turn >> nturn;
+	/*loadfile >> turn >> nturn;
 	try {
 		Coordinate d = { 0, 0 };
 		string chunk;
@@ -86,7 +88,11 @@ bool Game::load(const string filename)
 		cout << "Exception being handled" << endl;
 		cout << e << endl;
 		return false;
-	}
+	}*/
+
+	loadfile >> *this;
+
+	return true;
 }
 
 bool Game::place(const Coordinate & destination, unique_ptr<Piece>& _Piece, unique_ptr<string>& _Key)
@@ -150,7 +156,7 @@ bool Game::validate_move(const Coordinate & source, const Coordinate & destinati
 	}
 
 
-	// special case : Pawn ( very context(board scene) dependent )
+	// special case : Pawn ( very context(board) dependent )
 	bool BP = false;
 	bool WP = false;
 	if
@@ -256,7 +262,7 @@ public:
 
 void Game::draw()
 {
-	bool coordinate_marker = true;
+	bool coordinate_marker = true; // if turned off, game is difficult to play
 
 	const int black = 0;
 	const int white = 1;
@@ -282,7 +288,7 @@ void Game::draw()
 		cout << ' ';
 		for (int x = 0; x < Board::chess_board_size_second; ++x) {
 			for (int i = 0; i < cell_width; ++i) {
-				if (i == cell_width / 2) cout << char('a' + x);
+				if (i - 1 == cell_width / 2) cout << char('a' + x);
 				else cout << ' ';
 			}
 		}
@@ -363,7 +369,7 @@ void Game::draw()
 		cout << ' ';
 		for (int x = 0; x < Board::chess_board_size_second; ++x) {
 			for (int i = 0; i < cell_width; ++i) {
-				if (i == cell_width / 2) cout << char('a' + x);
+				if (i - 1 == cell_width / 2) cout << char('a' + x);
 				else cout << ' ';
 			}
 		}
@@ -537,11 +543,11 @@ ostream & operator<<(ostream & o, const Game & g)
 	for (int x = 0; x < Board::chess_board_size_first; ++x) {
 		for (int y = 0; y < Board::chess_board_size_second; ++y) {
 			if (g.b_map[x][y] != nullptr)
-				o << Coordinate(x,y) << *(g.b_map[x][y]) << ' ';
+				o << Coordinate(x,y) << ' ' << *(g.b_map[x][y]) << ' ';
 		}
 	}
 	o << endl;
-	o << g.history;
+	//o << g.history;
 
 	return o;
 }
@@ -549,21 +555,18 @@ ostream & operator<<(ostream & o, const Game & g)
 istream & operator >> (istream & i, Game & g)
 {
 	i >> g.turn >> g.nturn;
-	string l;
-	getline(i, l);
-	istringstream b(l);
-	Coordinate c;
-	string na;
+
+	string chunk;
+	Coordinate at;
 	g.clear();
-	while (b) {
-		b >> c;
-		b >> na;
-		g.place(c, na);
+	while (i) {
+		i >> at >> chunk;
+		g.place(at, chunk);
 	}
 
-	getline(i, l);
+	/*getline(i, l);
 	b.str(l);
 	g.history.clear();
-	b >> g.history;
+	b >> g.history;*/
 	return i;
 }
